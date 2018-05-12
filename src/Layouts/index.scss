@@ -1,0 +1,52 @@
+@import "../assets/css/variable.scss";
+
+/* slide 框宽度 */
+$slideWidth: 300px;
+
+.sideBar{
+  position: fixed;
+  width: $slideWidth;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  padding: 25px;
+  background: #5f7d8c;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: $menu-font-color-active;
+}
+
+.title {
+  font-size: 20px;
+  color: $menu-font-color;
+}
+
+.content{
+  padding-left:$slideWidth;
+}
+
+.menuNum{
+  color: $menu-font-color;
+  background: transparent;
+}
+
+:global(.menu-sub-item) > .menuNum{
+  float: right;
+  padding: 2px 4px;
+  background: #506a77;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.menuFlex{
+  display: inline-flex;
+  width: calc(100% - 40px);
+  justify-content: space-between;
+}
+

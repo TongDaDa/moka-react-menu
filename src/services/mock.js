@@ -24,7 +24,8 @@ export default [
             engineerId: "01-5"
         }]
     },
-    { partName: '产品设计部门',
+    {
+      partName: '产品设计部门',
       partId: "02",
       subjectEngineers: [{
           postName: '网页设计师',

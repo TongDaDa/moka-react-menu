@@ -6,30 +6,44 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import MenuItem from './menuItem'
+import MenuItem from './menuItem';
+import SubMenuItem from './SubMenuItem'
 import classnames from 'classnames';
+import './index.scss'
 
 class Menu extends Component {
 
     static propTypes = {
         isRelevance: PropTypes.bool,
-
+        showCheckbox: PropTypes.bool,
+        openKeys: PropTypes.array
     }
 
-    state = {
-        
+    static Item = MenuItem;
+
+    static SubMenuItem = SubMenuItem;
+
+    constructor(){
+        super();
     }
+
+    componentDidMount(){
+        const openKeys = this.props.openKeys;
+        this.props.children.map((i)=> {
+            if (openKeys.indexOf(i.key)) {
+            }
+        })
+    }
+
+    state = {}
 
     render() {
-        const {isRelevance} = this.props;
+        const {isRelevance,children,openKeys} = this.props;
         let menuClassObj = {menu:true}
-
         return <div className={classnames(menuClassObj)}>
-
+            { children }
         </div>
     }
 }
-
-Menu.Item = MenuItem;
 
 export default Menu;

@@ -4,8 +4,11 @@ import routes from '../common/routes'
 import {getMenuData} from '../common/menu';
 import NotFound from '../routes/Exception/404';
 import {Link,Switch,Route} from 'react-router-dom';
+import style from './index.scss'
+import menuData from 'services/mock'
 
 const MenuItem = Menu.Item;
+const SubMenuItem = Menu.SubMenuItem;
 
 export default class Lay extends Component {
 
@@ -17,69 +20,8 @@ export default class Lay extends Component {
         this.state = {
             location: this.props.location,
             collapsed: true,
-            openKeys: this.getDefaultCollapsedSubMenus(this.props),
+            openKeys: [],
         };
-    }
-
-    getDefaultCollapsedSubMenus(props) {
-        const { location: { pathname } } = props || this.props;
-        const snippets = pathname.split('/').slice(1, -1);
-        const currentPathSnippets = snippets.map((item, index) => {
-            const arr = snippets.filter((_, i) => i <= index);
-            return arr.join('/');
-        });
-        let currentMenuSelectedKeys = [];
-        currentPathSnippets.forEach((item) => {
-            currentMenuSelectedKeys = currentMenuSelectedKeys.concat(this.getSelectedMenuKeys(item));
-        });
-        if (currentMenuSelectedKeys.length === 0) {
-            return ['/base/record'];
-        }
-        return currentMenuSelectedKeys;
-    }
-
-    toggle = () => {
-        this.setState({
-            collapsed: !this.state.collapsed,
-        });
-    }
-
-    handleOpenChange = (openKeys) => {
-        const lastOpenKey = openKeys[openKeys.length - 1];
-        const isMainMenu = this.menus.some(
-            item => lastOpenKey && (item.key === lastOpenKey || item.path === lastOpenKey)
-        );
-        this.setState({
-            openKeys: isMainMenu ? [lastOpenKey] : [...openKeys],
-        });
-    }
-
-    getFlatMenuKeys = (menus) => {
-        let keys = [];
-        menus.forEach((item) => {
-            if (item.children) {
-                keys.push(item.path);
-                keys = keys.concat(this.getFlatMenuKeys(item.children));
-            } else {
-                keys.push(item.path);
-            }
-        });
-        return keys;
-    }
-
-    getSelectedMenuKeys = (path) => {
-        const flatMenuKeys = this.getFlatMenuKeys(this.menus);
-        if (flatMenuKeys.indexOf(path) > -1) {
-            return [path];
-        }
-        if (flatMenuKeys.indexOf(path.replace(/\/$/, '')) > -1) {
-            return [path.replace(/\/$/, '')];
-        }
-        return flatMenuKeys.filter((item) => {
-            const itemRegExpStr = `^${item.replace(/:[\w-]+/g, '[\\w-]+')}$`;
-            const itemRegExp = new RegExp(itemRegExpStr);
-            return itemRegExp.test(path.replace(/\/$/, ''));
-        });
     }
 
     getSubMenuOrItem = (item)=>{
@@ -115,12 +57,42 @@ export default class Lay extends Component {
 
     getNavMenuItems = (menusData) => {}
 
-    menuChange = ()=>{
+    menuChange = (key) => {
+        console.log('选中了'+key);
+    }
 
+    handleEmpty = ()=>{
+        this.setState({
+            openKeys:[]
+        })
     }
 
     onCheckboxChange = ()=>{
 
+    }
+
+    getSubMenuData = (data)=>{
+        console.log(data);
+        return data.map((menuItem,key)=>{
+            // 这里待优化，可以在subjectEngineers.map中累计数量，从而再次修改 subMenuItem 的 total, 后期使用引用完成
+            let total = menuItem.subjectEngineers.reduce((pre,nex)=> pre + nex.num,0);
+            if (menuItem.partName) {
+                return <SubMenuItem key={menuItem.partId} title={menuItem.partName} render={()=>(<span className={style.menuNum}> {total} </span>)} >
+                    {
+                        menuItem.subjectEngineers.map((menu)=>{
+                            return <MenuItem key={menu.engineerId} >
+                                <div className={style.menuFlex}>
+                                    { menu.postName }
+                                    <span className={style.menuNum}> {menu.num} </span>
+                                </div>
+                            </MenuItem>
+                        })
+                    }
+                </SubMenuItem>
+            } else {
+                return <MenuItem key={menuItem.engineerId}> { menuItem.postName } <span className={style.menuNum}> {menuItem.num} </span> </MenuItem>
+            }
+        })
     }
 
     render() {
@@ -128,20 +100,26 @@ export default class Lay extends Component {
         const { openKeys } = this.state;
 
         return <React.Fragment>
-            <div className="side-bar" key="sidebar" role="menu">
+
+            <div className={style.sideBar} key="sidebar" role="menu">
+
+                <header className={style.header}>
+                    <h2> 招聘职位 </h2>
+                    <a onClick={this.handleEmpty}> <span> 清空 </span> </a>
+                </header>
+
                 <Menu
                     onChange={this.menuChange}
                     showCheckbox={true}
+                    openKeys={openKeys}
                     onCheckboxChange={this.onCheckboxChange}
                     isRelevance={true}
                 >
-                    <MenuItem>
-                        <span>asdasd</span>
-                    </MenuItem>
+                    {this.getSubMenuData(menuData)}
                 </Menu>
             </div>
 
-            <div className="content">
+            <div className={style.content}>
                 {
                     routes.map(
                         (i,k)=> <Route path={i.path} key={i.path} component={i.component} exact={i.isExact} />
