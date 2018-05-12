@@ -19,43 +19,10 @@ export default class Lay extends Component {
         this.menus = getMenuData();
         this.state = {
             location: this.props.location,
-            collapsed: true,
-            openKeys: [],
+            openKeys: ["01-1","01-2"],
+            selected:{'01-1':true,"01-2":true},
         };
     }
-
-    getSubMenuOrItem = (item)=>{
-        if (item.children && item.children.some(child => child.name)) {
-            return (
-                <SubMenu
-                    title={
-                        item.icon ? (
-                            <span>
-                                {getIcon(item.icon)}
-                                <span>{item.name}</span>
-                            </span>
-                        ) : item.name
-                    }
-                    key={item.path}
-                >
-                    {this.getNavMenuItems(item.children)}
-                </SubMenu>
-            );
-        } else {
-            return (
-                <Menu.Item key={item.key || item.path}>
-                    <Link
-                        to={item.path}
-                        replace={item.path === this.props.location.pathname}
-                    >
-                        {getIcon(item.icon)}<span>{item.name}</span>
-                    </Link>
-                </Menu.Item>
-            );
-        }
-    }
-
-    getNavMenuItems = (menusData) => {}
 
     menuChange = (key) => {
         console.log('选中了'+key);
@@ -63,24 +30,50 @@ export default class Lay extends Component {
 
     handleEmpty = ()=>{
         this.setState({
-            openKeys:[]
+            openKeys:[],
+            selected:{}
         })
     }
 
-    onCheckboxChange = ()=>{
+    onSubMenuChange = (key) => {
+        // 查找数据结构，把key下面所有的子级清空
+        const selected = this.state.selected
+        const child = menuData.find(i=>i.partId === key)
+        if (!child) { return; }
+        const childKeys = child.subjectEngineers.map(i=>i.engineerId)
+        const status = !selected[key]
+        selected[key] = status;
+        childKeys.forEach((k)=>{
+            selected[k] = status
+        })
+        this.menuChange(key)
+        this.setState({ selected: this.state.selected })
+    }
 
+    onChange = (key)=>{
+        this.state.selected[key] = !this.state.selected[key];
+        this.menuChange(key)
+        this.setState({
+            selected:this.state.selected
+        })
     }
 
     getSubMenuData = (data)=>{
-        console.log(data);
+        const {selected} = this.state
         return data.map((menuItem,key)=>{
             // 这里待优化，可以在subjectEngineers.map中累计数量，从而再次修改 subMenuItem 的 total, 后期使用引用完成
             let total = menuItem.subjectEngineers.reduce((pre,nex)=> pre + nex.num,0);
             if (menuItem.partName) {
-                return <SubMenuItem key={menuItem.partId} title={menuItem.partName} render={()=>(<span className={style.menuNum}> {total} </span>)} >
+                return <SubMenuItem key={menuItem.partId}
+                                    activeKey={menuItem.partId}
+                                    onChange={this.onSubMenuChange}
+                                    isChecked={selected[menuItem.partId]}
+                                    title={menuItem.partName}
+                                    render={()=>(<span className={style.menuNum}> {total} </span>)}
+                >
                     {
                         menuItem.subjectEngineers.map((menu)=>{
-                            return <MenuItem key={menu.engineerId} >
+                            return <MenuItem key={menu.engineerId} activeKey={menu.engineerId} isChecked={selected[menu.engineerId]} onChange={this.onChange}>
                                 <div className={style.menuFlex}>
                                     { menu.postName }
                                     <span className={style.menuNum}> {menu.num} </span>
@@ -105,7 +98,7 @@ export default class Lay extends Component {
 
                 <header className={style.header}>
                     <h2> 招聘职位 </h2>
-                    <a onClick={this.handleEmpty}> <span> 清空 </span> </a>
+                   <span  onClick={this.handleEmpty} > 清空 </span>
                 </header>
 
                 <Menu

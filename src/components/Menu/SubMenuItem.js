@@ -15,34 +15,8 @@ export default class SubMenuItem extends Component {
         isRelativeAll: true
     }
 
-    static childContextTypes = {
-        is: PropTypes.bool,
-    };
-
-    static contextTypes = {
-        siderCollapsed: PropTypes.bool,
-    };
-
     state = {
-        isHidden: true,
-        checked: false
-    }
-
-    componentDidMount(){
-        console.log(this);
-    }
-
-    handleCheckboxChange = (value,e) => {
-        e.stopPropagation();
-        if (value) {
-            // 遍历 children 取消掉多选框
-            // this.props.children.map((i,key)=>{
-            //     console.log(i);
-            // })
-        }  else {
-            //取消选中
-        }
-        this.setState({ isHidden: value })
+        isHidden: true
     }
 
     handleItemClick = (e) => {
@@ -52,12 +26,12 @@ export default class SubMenuItem extends Component {
     }
 
     render() {
-        const {isShowSubject,render,key} = this.props;
-        const {isHidden,checked} = this.state;
+        const {isShowSubject,onChange,isChecked,activeKey,render} = this.props;
+        const {isHidden} = this.state;
         return <div className="menu-sub-item" onClick={this.handleItemClick} >
-            <Checkbox checked={checked} onChange={this.handleCheckboxChange} />
+            <Checkbox checked={isChecked} onChange={(value,e)=>{ e.stopPropagation(); onChange(activeKey) }} />
             { this.props.title }
-            { isShowSubject && <span className={classnames({['menu-pulldown-icon']:true, ['menu-pulldown-icon-active']: !isHidden})}>   </span> }
+            { isShowSubject && <span className={classnames({['menu-pulldown-icon']:true, ['menu-pulldown-icon-active']: !isHidden})}>  </span> }
             { render && render() }
             <ul className={classnames({'menu-item-list':true, 'menu-item-list-hidden': isHidden})}>
                 {this.props.children}

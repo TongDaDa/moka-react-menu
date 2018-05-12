@@ -6,18 +6,10 @@ export default class MenuItem extends Component {
 
     static propTypes = {}
 
-    state = { isChecked:false }
-
-    menuItemClick = (e)=>{
-        e.stopPropagation();
-        this.handleClickCallBack && this.handleClickCallBack(this.props.key);
-        this.setState({ isChecked: !this.state.isChecked })
-    }
 
     render() {
-        const {isChecked} = this.state;
-        const {children} = this.props;
-        return <li className="menu-item" onClick={this.menuItemClick}>
+        const {children,isChecked,onChange,activeKey} = this.props;
+        return <li className="menu-item" onClick={(e)=>{ e.stopPropagation(); onChange(activeKey) }}>
             <div className="menu-item-content">
                 <Checkbox checked={isChecked} />
                 {children}
